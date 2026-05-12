@@ -1,6 +1,17 @@
 import { GoogleGenAI } from "@google/genai";
 
-export const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
+let aiInstance: GoogleGenAI | null = null;
+
+export function getGemini() {
+  if (!aiInstance) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return null;
+    }
+    aiInstance = new GoogleGenAI({ apiKey });
+  }
+  return aiInstance;
+}
 
 export const MODELS = {
   TEXT: "gemini-3-flash-preview",

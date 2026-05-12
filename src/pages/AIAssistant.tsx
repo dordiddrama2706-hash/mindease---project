@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ai, MODELS, SYSTEM_INSTRUCTIONS } from '../lib/gemini';
+import { getGemini, MODELS, SYSTEM_INSTRUCTIONS } from '../lib/gemini';
 import { useAuth } from '../hooks/useAuth';
 import { motion, AnimatePresence } from 'motion/react';
 import { Send, Sparkles, User, Bot, Loader2, Info } from 'lucide-react';
@@ -27,7 +27,12 @@ export default function AIAssistant() {
     setIsTyping(true);
 
     try {
-      const chat = ai.chats.create({
+      const gemini = getGemini();
+      if (!gemini) {
+        throw new Error("AI service is not configured.");
+      }
+      
+      const chat = gemini.chats.create({
         model: MODELS.TEXT,
         config: {
           systemInstruction: SYSTEM_INSTRUCTIONS.COMPANION,
@@ -49,6 +54,8 @@ export default function AIAssistant() {
     }
   };
 
+  const geminiAvailable = !!process.env.GEMINI_API_KEY;
+
   return (
     <div className="flex flex-col h-[calc(100vh-140px)] md:h-[calc(100vh-160px)]">
       <header className="flex items-center gap-4 mb-8">
@@ -57,12 +64,24 @@ export default function AIAssistant() {
         </div>
         <div>
           <h1 className="text-2xl font-sans font-semibold text-[#4A4E69] tracking-tight">Lumi AI</h1>
-          <p className="text-[10px] text-[#4A4E69]/40 font-bold uppercase tracking-widest">Always Listening</p>
+          <p className="text-[10px] text-[#4A4E69]/40 font-bold uppercase tracking-widest">
+            {geminiAvailable ? 'Always Listening' : 'Offline Temporarily'}
+          </p>
         </div>
       </header>
 
       <div className="flex-1 overflow-y-auto mb-6 space-y-6 px-1 custom-scrollbar" ref={scrollRef}>
-        {messages.length === 0 && (
+        {!geminiAvailable && (
+          <div className="bg-[#FAF9F6] border border-[#F0EBE3] p-6 rounded-[32px] text-center space-y-3">
+            <Bot size={32} className="mx-auto text-[#4A4E69]/20" />
+            <h3 className="font-semibold text-[#4A4E69]">Lumi is resting</h3>
+            <p className="text-xs text-[#4A4E69]/60 leading-relaxed">
+              To talk to Lumi, please ensure a Gemini API key is configured in your project settings. 
+              In the meantime, feel free to use the mood tracker or breathing exercises.
+            </p>
+          </div>
+        )}
+        {messages.length === 0 && geminiAvailable && (
           <div className="text-center py-16">
             <Sparkles className="mx-auto mb-6 text-[#DCD6F7]" size={48} />
             <h3 className="font-sans font-semibold text-[#4A4E69] text-xl mb-3 tracking-tight">Hello, {profile?.displayName}!</h3>
@@ -117,17 +136,18 @@ export default function AIAssistant() {
         </AnimatePresence>
       </div>
 
-      <div className="bg-white p-3 rounded-[32px] border border-[#F0EBE3] flex gap-3 shadow-sm mb-6">
+      <div className={`bg-white p-3 rounded-[32px] border border-[#F0EBE3] flex gap-3 shadow-sm mb-6 ${!geminiAvailable ? 'opacity-50 grayscale' : ''}`}>
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-          placeholder="Talk to Lumi..."
+          placeholder={geminiAvailable ? "Talk to Lumi..." : "AI unavailable"}
+          disabled={!geminiAvailable}
           className="flex-1 bg-transparent px-5 py-4 outline-none text-[#4A4E69] text-sm font-medium placeholder:text-[#4A4E69]/20"
         />
         <button 
           onClick={handleSend}
-          disabled={!input.trim() || isTyping}
+          disabled={!input.trim() || isTyping || !geminiAvailable}
           className="w-14 h-14 bg-[#4A4E69] rounded-[24px] flex items-center justify-center text-white disabled:opacity-30 transition-all shadow-md hover:bg-[#4A4E69]/90 active:scale-95"
         >
           <Send size={24} strokeWidth={2.5} />

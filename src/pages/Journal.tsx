@@ -3,7 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useFirestore } from '../lib/firestore_hooks';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { ai, MODELS, SYSTEM_INSTRUCTIONS } from '../lib/gemini';
+import { getGemini, MODELS, SYSTEM_INSTRUCTIONS } from '../lib/gemini';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Search, Calendar, ChevronRight, PenTool, Sparkles, Brain, Save, X, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -43,7 +43,12 @@ export default function Journal() {
     if (!content.trim()) return;
     setIsAnalyzing(true);
     try {
-      const response = await ai.models.generateContent({
+      const gemini = getGemini();
+      if (!gemini) {
+        throw new Error("AI service is not configured.");
+      }
+
+      const response = await gemini.models.generateContent({
         model: MODELS.TEXT,
         contents: content,
         config: {
@@ -59,6 +64,8 @@ export default function Journal() {
       setIsAnalyzing(false);
     }
   };
+
+  const geminiAvailable = !!process.env.GEMINI_API_KEY;
 
   return (
     <div className="space-y-6 pb-20">
@@ -90,14 +97,16 @@ export default function Journal() {
                   <X size={24} />
                 </button>
                 <div className="flex gap-4">
-                  <button 
-                    onClick={analyzeDistortions} 
-                    disabled={isAnalyzing || !content.trim()}
-                    className="btn-secondary py-3 flex items-center gap-2 text-[10px] uppercase tracking-widest px-6"
-                  >
-                    {isAnalyzing ? <Loader2 size={16} className="animate-spin text-[#4A4E69]" /> : <Brain size={16} className="text-[#4A4E69]" />}
-                    Check Thoughts
-                  </button>
+                  {geminiAvailable && (
+                    <button 
+                      onClick={analyzeDistortions} 
+                      disabled={isAnalyzing || !content.trim()}
+                      className="btn-secondary py-3 flex items-center gap-2 text-[10px] uppercase tracking-widest px-6"
+                    >
+                      {isAnalyzing ? <Loader2 size={16} className="animate-spin text-[#4A4E69]" /> : <Brain size={16} className="text-[#4A4E69]" />}
+                      Check Thoughts
+                    </button>
+                  )}
                   <button onClick={handleSave} className="btn-primary py-3 flex items-center gap-2 text-[10px] uppercase tracking-widest px-6">
                     <Save size={16} />
                     Save
