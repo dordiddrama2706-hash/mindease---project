@@ -1,25 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { useFirestore } from '../lib/firestore_hooks';
-import { collection, query, orderBy, limit, onSnapshot, updateDoc, doc, increment } from 'firebase/firestore';
+import { useFirestore, useCommunityPosts } from '../lib/firestore_hooks';
+import { updateDoc, doc, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, Heart, AlertCircle, Send, Users, Sparkles } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function Community() {
-  const { user } = useAuth();
   const { addPost } = useFirestore();
-  const [posts, setPosts] = useState<any[]>([]);
+  const { posts, loading } = useCommunityPosts();
   const [content, setContent] = useState('');
   const [isPosting, setIsPosting] = useState(false);
-
-  useEffect(() => {
-    const q = query(collection(db, 'community'), orderBy('timestamp', 'desc'), limit(50));
-    return onSnapshot(q, (snapshot) => {
-      setPosts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    });
-  }, []);
 
   const handlePost = async () => {
     if (!content.trim() || isPosting) return;

@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { useFirestore } from '../lib/firestore_hooks';
-import { collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { useFirestore, useMoods } from '../lib/firestore_hooks';
 import { motion } from 'motion/react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Calendar, Trash2, ChevronRight, PlusCircle } from 'lucide-react';
@@ -17,29 +14,10 @@ const moodConfig = [
 ];
 
 export default function MoodTracker() {
-  const { user } = useAuth();
   const { addMood } = useFirestore();
-  const [moods, setMoods] = useState<any[]>([]);
+  const { moods, loading } = useMoods();
   const [showSelector, setShowSelector] = useState(false);
   const [note, setNote] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!user) return;
-    const q = query(
-      collection(db, 'moods'),
-      where('userId', '==', user.uid),
-      orderBy('timestamp', 'desc'),
-      limit(20)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setMoods(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [user]);
 
   const handleMoodSubmit = async (level: number) => {
     await addMood(level, [], note);

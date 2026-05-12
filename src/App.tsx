@@ -16,7 +16,7 @@ export default function App() {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  if (loading && !user) {
+  if (loading) {
     return (
       <div className="fixed inset-0 bg-[#FAF9F6] flex items-center justify-center">
         <motion.div
@@ -29,9 +29,7 @@ export default function App() {
     );
   }
 
-  if (!user) {
-    return <Auth />;
-  }
+  // Auth wall removed for Guest Access
 
   const renderContent = () => {
     switch (activeTab) {

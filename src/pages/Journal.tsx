@@ -1,35 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { useFirestore } from '../lib/firestore_hooks';
-import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { useFirestore, useJournalEntries } from '../lib/firestore_hooks';
 import { getGemini, MODELS, SYSTEM_INSTRUCTIONS } from '../lib/gemini';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Search, Calendar, ChevronRight, PenTool, Sparkles, Brain, Save, X, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function Journal() {
-  const { user } = useAuth();
   const { addJournalEntry } = useFirestore();
-  const [entries, setEntries] = useState<any[]>([]);
+  const { entries, loading } = useJournalEntries();
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<any[]>([]);
   const [selectedEntry, setSelectedEntry] = useState<any | null>(null);
-
-  useEffect(() => {
-    if (!user) return;
-    const q = query(
-      collection(db, 'journal'),
-      where('userId', '==', user.uid),
-      orderBy('timestamp', 'desc')
-    );
-    return onSnapshot(q, (snapshot) => {
-      setEntries(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    });
-  }, [user]);
 
   const handleSave = async () => {
     if (!content.trim()) return;
