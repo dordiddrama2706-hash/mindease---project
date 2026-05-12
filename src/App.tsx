@@ -16,12 +16,6 @@ export default function App() {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  React.useEffect(() => {
-    if (user) {
-      localStorage.removeItem('onboarding_step');
-    }
-  }, [user]);
-
   if (loading && !user) {
     return (
       <div className="fixed inset-0 bg-[#FAF9F6] flex items-center justify-center">
