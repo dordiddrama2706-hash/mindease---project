@@ -1,0 +1,79 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and preferences",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "calmPoints": { "type": "number" },
+        "streak": { "type": "number" },
+        "lastCheckIn": { "type": "string", "format": "date-time" },
+        "avatarUrl": { "type": "string" }
+      },
+      "required": ["uid"]
+    },
+    "Mood": {
+      "title": "Mood",
+      "description": "Daily mood check-in entry",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "level": { "type": "number" },
+        "emotions": { "type": "array", "items": { "type": "string" } },
+        "note": { "type": "string" }
+      }
+    },
+    "JournalEntry": {
+      "title": "Journal Entry",
+      "description": "Private personal journal entry",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "content": { "type": "string" },
+        "title": { "type": "string" },
+        "audioUrl": { "type": "string" },
+        "distortions": { "type": "array", "items": { "type": "string" } },
+        "isLocked": { "type": "boolean" }
+      }
+    },
+    "CommunityPost": {
+      "title": "Community Post",
+      "description": "Anonymous support wall post",
+      "type": "object",
+      "properties": {
+        "content": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorHandle": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "sentiment": { "type": "string" },
+        "reportCount": { "type": "number" }
+      }
+    },
+    "ThoughtChallenge": {
+      "title": "Thought Challenge",
+      "description": "CBT-based thought reframing",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "originalThought": { "type": "string" },
+        "evidenceFor": { "type": "string" },
+        "evidenceAgainst": { "type": "string" },
+        "realisticOutcome": { "type": "string" },
+        "reframedThought": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "firestore": {
+    "users": { "schema": "User", "description": "User profile data" },
+    "moods": { "schema": "Mood", "description": "Mood tracking history" },
+    "journal": { "schema": "JournalEntry", "description": "Secure journal logs" },
+    "community": { "schema": "CommunityPost", "description": "Anonymous support wall" },
+    "thought_challenges": { "schema": "ThoughtChallenge", "description": "CBT exercises" }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "MindEase",
+  "description": "A calming mental wellness app for overthinking and anxiety relief, featuring mood tracking, journaling, games, and an AI companion.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": []
+}

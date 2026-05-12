@@ -1,0 +1,82 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isVerified() { return request.auth.token.email_verified == true; }
+
+    // Entity validations
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'displayName']) &&
+             data.uid is string && data.uid == request.auth.uid &&
+             data.displayName is string && data.displayName.size() <= 100;
+    }
+
+    function isValidMood(data) {
+      return data.userId == request.auth.uid &&
+             data.level is number && data.level >= 1 && data.level <= 5 &&
+             data.timestamp is timestamp &&
+             (data.get('note', '') is string && data.get('note', '').size() <= 500);
+    }
+
+    function isValidJournalEntry(data) {
+      return data.userId == request.auth.uid &&
+             data.content is string && data.content.size() <= 10000 &&
+             data.timestamp is timestamp;
+    }
+
+    function isValidPost(data) {
+      return data.authorId == request.auth.uid &&
+             data.content is string && data.content.size() <= 500 &&
+             data.timestamp is timestamp;
+    }
+
+    // Collection Rules
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming()) && 
+                    incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'calmPoints', 'streak', 'lastCheckIn', 'avatarUrl']);
+    }
+
+    match /moods/{moodId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidMood(incoming());
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    match /journal/{entryId} {
+      allow list, get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidJournalEntry(incoming());
+      allow update: if isSignedIn() && isOwner(existing().userId) && isValidJournalEntry(incoming());
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    match /community/{postId} {
+      allow list: if isSignedIn();
+      allow get: if isSignedIn();
+      allow create: if isSignedIn() && isValidPost(incoming());
+      allow update: if isSignedIn() && (
+        (isOwner(existing().authorId) && incoming().diff(existing()).affectedKeys().hasOnly(['content'])) ||
+        (incoming().diff(existing()).affectedKeys().hasOnly(['reportCount'])) // Anyone can report
+      );
+      allow delete: if isSignedIn() && isOwner(existing().authorId);
+    }
+
+    match /thought_challenges/{challengeId} {
+      allow list, get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && incoming().userId == request.auth.uid;
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+  }
+}

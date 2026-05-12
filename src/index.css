@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", "Cormorant Garamond", serif;
+}
+
+:root {
+  --app-bg: #FAF9F6;
+  --app-text: #4A4E69;
+  --app-accent: #4A4E69;
+  --app-lavender: #DCD6F7;
+  --app-mint: #F1F8E9;
+  --app-teal: #E0F2F1;
+  --app-orange: #FFF3E0;
+  --app-border: #F0EBE3;
+}
+
+body {
+  @apply bg-[#FAF9F6] text-[#4A4E69] font-sans selection:bg-[#DCD6F7];
+  -webkit-tap-highlight-color: transparent;
+}
+
+.glass {
+  @apply bg-white/50 backdrop-blur-sm border border-white/20;
+}
+
+.card-soft {
+  @apply rounded-[32px] p-6 shadow-sm border border-[#F0EBE3] bg-white transition-all duration-300;
+}
+
+.card-soft:hover {
+  @apply shadow-md transform -translate-y-1;
+}
+
+.btn-primary {
+  @apply bg-[#4A4E69] text-white rounded-full px-8 py-3 font-medium hover:opacity-90 transition-all shadow-sm active:scale-95;
+}
+
+.btn-secondary {
+  @apply bg-white text-[#4A4E69] rounded-full px-8 py-3 font-medium border border-[#F0EBE3] hover:bg-[#FAF9F6] transition-all active:scale-95;
+}
+
+.btn-sos {
+  @apply bg-[#FF8A80] text-white rounded-[32px] p-6 shadow-md hover:bg-[#FF5252] transition-colors flex items-center justify-between w-full;
+}
