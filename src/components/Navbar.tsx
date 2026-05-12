@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Heart, BookOpen, Shield, MessageCircle, Moon, Users, LayoutGrid } from 'lucide-react';
+import { Home, Heart, BookOpen, Shield, MessageCircle, Moon, Users, LayoutGrid, Settings as SettingsIcon } from 'lucide-react';
 
 interface NavbarProps {
   activeTab: string;
@@ -11,7 +11,8 @@ const navItems = [
   { id: 'mood', icon: Heart, label: 'Mood' },
   { id: 'toolkit', icon: Shield, label: 'Tools' },
   { id: 'journal', icon: BookOpen, label: 'Journal' },
-  { id: 'ai', icon: MessageCircle, label: 'MindEase AI' },
+  { id: 'ai', icon: MessageCircle, label: 'Lumi' },
+  { id: 'settings', icon: SettingsIcon, label: 'Settings' },
 ];
 
 export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {

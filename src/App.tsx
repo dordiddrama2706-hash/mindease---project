@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useAuth } from './hooks/useAuth';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
-import Auth from './pages/Auth';
 import MoodTracker from './pages/MoodTracker';
 import Toolkit from './pages/Toolkit';
 import Journal from './pages/Journal';
@@ -10,6 +9,8 @@ import AIAssistant from './pages/AIAssistant';
 import Games from './pages/Games';
 import Sleep from './pages/Sleep';
 import Community from './pages/Community';
+import Settings from './pages/Settings';
+import PinLock from './components/PinLock';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function App() {
@@ -29,8 +30,6 @@ export default function App() {
     );
   }
 
-  // Auth wall removed for Guest Access
-
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard': return <Dashboard setActiveTab={setActiveTab} />;
@@ -41,26 +40,29 @@ export default function App() {
       case 'games': return <Games />;
       case 'sleep': return <Sleep />;
       case 'community': return <Community />;
+      case 'settings': return <Settings />;
       default: return <Dashboard setActiveTab={setActiveTab} />;
     }
   };
 
   return (
-    <div className="min-h-screen pb-20 md:pb-0 md:pt-20">
-      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <main className="max-w-screen-md mx-auto px-4 py-8">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
-          >
-            {renderContent()}
-          </motion.div>
-        </AnimatePresence>
-      </main>
-    </div>
+    <PinLock>
+      <div className="min-h-screen pb-20 md:pb-0 md:pt-20">
+        <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
+        <main className="max-w-screen-md mx-auto px-4 py-8">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              {renderContent()}
+            </motion.div>
+          </AnimatePresence>
+        </main>
+      </div>
+    </PinLock>
   );
 }

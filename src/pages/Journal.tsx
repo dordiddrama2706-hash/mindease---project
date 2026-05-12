@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useFirestore, useJournalEntries } from '../lib/firestore_hooks';
-import { getGemini, MODELS, SYSTEM_INSTRUCTIONS } from '../lib/gemini';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Search, Calendar, ChevronRight, PenTool, Sparkles, Brain, Save, X, Loader2 } from 'lucide-react';
+import { Plus, Search, Calendar, ChevronRight, PenTool, Save, X } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function Journal() {
@@ -11,8 +10,6 @@ export default function Journal() {
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysis, setAnalysis] = useState<any[]>([]);
   const [selectedEntry, setSelectedEntry] = useState<any | null>(null);
 
   const handleSave = async () => {
@@ -22,34 +19,6 @@ export default function Journal() {
     setContent('');
     setTitle('');
   };
-
-  const analyzeDistortions = async () => {
-    if (!content.trim()) return;
-    setIsAnalyzing(true);
-    try {
-      const gemini = getGemini();
-      if (!gemini) {
-        throw new Error("AI service is not configured.");
-      }
-
-      const response = await gemini.models.generateContent({
-        model: MODELS.TEXT,
-        contents: content,
-        config: {
-          systemInstruction: SYSTEM_INSTRUCTIONS.DISTORTION_DETECTOR,
-          responseMimeType: "application/json"
-        }
-      });
-      const result = JSON.parse(response.text);
-      setAnalysis(Array.isArray(result) ? result : [result]);
-    } catch (e) {
-      console.error("Analysis failed", e);
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
-
-  const geminiAvailable = !!process.env.GEMINI_API_KEY;
 
   return (
     <div className="space-y-6 pb-20">
@@ -81,16 +50,6 @@ export default function Journal() {
                   <X size={24} />
                 </button>
                 <div className="flex gap-4">
-                  {geminiAvailable && (
-                    <button 
-                      onClick={analyzeDistortions} 
-                      disabled={isAnalyzing || !content.trim()}
-                      className="btn-secondary py-3 flex items-center gap-2 text-[10px] uppercase tracking-widest px-6"
-                    >
-                      {isAnalyzing ? <Loader2 size={16} className="animate-spin text-[#4A4E69]" /> : <Brain size={16} className="text-[#4A4E69]" />}
-                      Check Thoughts
-                    </button>
-                  )}
                   <button onClick={handleSave} className="btn-primary py-3 flex items-center gap-2 text-[10px] uppercase tracking-widest px-6">
                     <Save size={16} />
                     Save
@@ -112,27 +71,6 @@ export default function Journal() {
                   placeholder="Start writing your thoughts here..."
                   className="flex-1 text-lg text-[#4A4E69] outline-none resize-none placeholder:text-[#4A4E69]/10 leading-[1.8] font-serif custom-scrollbar"
                 />
-                
-                {analysis.length > 0 && (
-                  <motion.div 
-                    initial={{ height: 0, opacity: 0 }} 
-                    animate={{ height: 'auto', opacity: 1 }} 
-                    className="mt-8 p-6 bg-[#E0F2F1] rounded-[24px] border border-[#B2DFDB] overflow-y-auto max-h-48"
-                  >
-                    <div className="flex items-center gap-2 mb-4 text-[#00695C] font-bold text-[10px] uppercase tracking-widest">
-                      <Sparkles size={14} />
-                      AI Insight
-                    </div>
-                    <div className="space-y-3">
-                      {analysis.map((item, i) => (
-                        <div key={i} className="text-xs leading-relaxed">
-                          <span className="font-bold text-[#004D40] uppercase tracking-tighter mr-2">{item.distortion}:</span>
-                          <span className="text-[#4A4E69]/70 italic">"{item.explanation}"</span>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
               </div>
             </div>
           </motion.div>

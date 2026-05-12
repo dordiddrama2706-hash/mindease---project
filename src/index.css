@@ -45,3 +45,13 @@ body {
 .btn-sos {
   @apply bg-[#FF8A80] text-white rounded-[32px] p-6 shadow-md hover:bg-[#FF5252] transition-colors flex items-center justify-between w-full;
 }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+.animate-shake {
+  animation: shake 0.2s ease-in-out infinite;
+}
