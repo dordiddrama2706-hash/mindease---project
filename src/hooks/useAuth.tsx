@@ -20,23 +20,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setLoading(true);
       setUser(user);
       if (user) {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) {
-          setProfile(userDoc.data());
-        } else {
-          const newProfile = {
-            uid: user.uid,
-            displayName: user.displayName || 'Friend',
-            email: user.email,
-            calmPoints: 0,
-            streak: 0,
-            avatarUrl: user.photoURL,
-            createdAt: new Date().toISOString(),
-          };
-          await setDoc(doc(db, 'users', user.uid), newProfile);
-          setProfile(newProfile);
+        try {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists()) {
+            setProfile(userDoc.data());
+          } else {
+            const newProfile = {
+              uid: user.uid,
+              displayName: user.displayName || 'Friend',
+              email: user.email,
+              calmPoints: 0,
+              streak: 0,
+              avatarUrl: user.photoURL,
+              createdAt: new Date().toISOString(),
+            };
+            await setDoc(doc(db, 'users', user.uid), newProfile);
+            setProfile(newProfile);
+          }
+        } catch (error) {
+          console.error("Error fetching profile:", error);
         }
       } else {
         setProfile(null);
